@@ -1,35 +1,36 @@
 provider "aws" {
-  region     = var.region
-  access_key = var.access_key
-  secret_key = var.secret_key
-  token      = var.session_token
+  region     = "us-east-1"
+  access_key = "ASIAVRUVV5ETYFEMHT3S"
+  secret_key = "sNel0B0l+UPB6hvM+a0MZLbZGIMRSVGWDotwXsEO"
+  token      = "IQoJb3JpZ2luX2VjEDUaCXVzLXdlc3QtMiJGMEQCIFwh01jCyq+xQcHCeF1S6EThDzYbDz2Fhk1JgZXjR1IYAiB4ZDIBrMNCFveiw3qghvk8Gc5drw4VWPonmF2qewiUSSq3Agiu//////////8BEAAaDDM4MTQ5MjI1OTExMSIMafR73YT2nJtMfYwuKosCXokA3KUB/XKTlpl298mq5WOa/J86hqlx4hW35E+VJD9oD3PynZCW+jspFlZE7Y6sRCg/oHlyc7LaF1Y4O4actY1eBtDBn/ImVH5iih75G/Pdu7eVoClDyPugsbc2bpTBBgoiZbFzrRBmjw942p0YHxrDsSXA9e9L6yF13hpN6ccSVNtLMB6Wffkgnh3fhu3J/QvhIAOkd9usm7kvbgu3n9OHZTTDNgYLqxZKb5UHMYW9otJ4skVFJ96qPUIqHLYowE5UfTYRh9Cad16cNJmn+hJ3Ht2mSc68q9QFk/3K0bn6pof1/TsQXp/skVmYZk6mcsfytWxy1zStaDwsMThSu7HfSAUjUjRo0tMRMIb6lLkGOp4BzYEfyeDVnBBUvqmwS2qOWgrlp1jnVa2nt2Lldii07yNzMWod9jnskroSTo47hegmlZMcReXyEvMr/cEQUTSRa3Zst3aJuN0VaJ7eIyVPUyyFiGbZ7pzdaq/qI7o4fiWi9mNgDpS6VV60QZJYgbYZC76y2iAlAFpFW7vLLYUOQWEMuTZbavQcTVS5hA/fb8H8fltoEs/mCnIP3DwXk5M="
 }
+
 
 # Criar a VPC
 resource "aws_vpc" "my_vpc" {
   cidr_block = "10.0.0.0/16"
 }
 
-# Criar uma sub-rede pública em us-west-2a
+# Criar uma sub-rede pública em us-east-1a
 resource "aws_subnet" "public_subnet" {
   vpc_id            = aws_vpc.my_vpc.id
   cidr_block        = "10.0.1.0/27"
-  availability_zone = "us-west-2a"
+  availability_zone = "us-east-1a"
   map_public_ip_on_launch = true
 }
 
-# Criar uma sub-rede privada em us-west-2b para o RDS
+# Criar uma sub-rede privada em us-east-1a para o RDS
 resource "aws_subnet" "private_subnet_1" {
   vpc_id            = aws_vpc.my_vpc.id
   cidr_block        = "10.0.2.0/27"
-  availability_zone = "us-west-2b"
+  availability_zone = "us-east-1a"
 }
 
-# Criar uma segunda sub-rede privada em us-west-2c para o RDS
+# Criar uma segunda sub-rede privada em us-east-1a para o RDS
 resource "aws_subnet" "private_subnet_2" {
   vpc_id            = aws_vpc.my_vpc.id
   cidr_block        = "10.0.3.0/27"
-  availability_zone = "us-west-2c"
+  availability_zone = "us-east-1b"
 }
 
 # Gateway de internet para permitir o acesso público das instâncias EC2
@@ -116,10 +117,10 @@ resource "aws_db_subnet_group" "rds_subnet" {
 
 # Instâncias EC2 na sub-rede pública
 resource "aws_instance" "web_server" {
-  ami           = "ami-04b70fa74e45c3917" # Substituir pelo ID da AMI desejada em us-west-2
+  ami           = "ami-04b70fa74e45c3917"  # Certifique-se de que a AMI está disponível
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.public_subnet.id
-  security_groups = [aws_security_group.ec2_sg.name]
+  vpc_security_group_ids = [aws_security_group.ec2_sg.id]  # Use vpc_security_group_ids
   associate_public_ip_address = true
   count = 2
 }
